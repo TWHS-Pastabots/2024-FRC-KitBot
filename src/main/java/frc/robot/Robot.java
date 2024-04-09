@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.subsys.Drivetrain;
 import frc.robot.subsys.Drivetrain.DriveSpeed;
 
@@ -29,7 +32,7 @@ import frc.robot.subsys.Roof.RoofState;
 import frc.robot.subsys.Launcher;
 
 import frc.robot.subsys.Roof;
-
+import frc.robot.subsys.VisionTablesListener;
 import frc.robot.auton.sequences.*;
 
 
@@ -46,6 +49,7 @@ private PS4Controller operator;
 
 private Drivetrain drivetrain;
 private Launcher launcher;
+private VisionTablesListener visTables;
 //private Roof roof;
 
 private static final String kDefaultAuto = "BAMP";
@@ -65,53 +69,59 @@ Thread m_visionThread;
   public void robotInit() {
     drivetrain = Drivetrain.getInstance();
     launcher = Launcher.getInstance();
+    visTables = VisionTablesListener.getInstance();
     //roof = Roof.getInstance();
 
     m_chooser.setDefaultOption("BAMP", kDefaultAuto);
     SmartDashboard.putData("AUTON SEQUENCES", m_chooser);
 
-    m_visionThread =
-    new Thread(
-        () -> {
-          // Get the UsbCamera from CameraServer
-          UsbCamera camera = CameraServer.startAutomaticCapture("cam1", 0);
+    // m_visionThread =
+    // new Thread(
+    //     () -> {
+    //       // Get the UsbCamera from CameraServer
+    //       UsbCamera camera = CameraServer.startAutomaticCapture("cam1", 0);
 
-          // Set the resolution
-          camera.setResolution(640, 480);
+    //       // Set the resolution
+    //       camera.setResolution(640, 480);
 
-          // Get a CvSink. This will capture Mats from the camera
-          CvSink cvSink = CameraServer.getVideo();
+    //       // Get a CvSink. This will capture Mats from the camera
+    //       CvSink cvSink = CameraServer.getVideo();
           
-          // Setup a CvSource. This will send images back to the Dashboard
-          CvSource outputStream = CameraServer.putVideo("Rectangle", 640, 480);
+    //       // Setup a CvSource. This will send images back to the Dashboard
+    //       CvSource outputStream = CameraServer.putVideo("Rectangle", 640, 480);
 
-          // Mats are very memory expensive. Lets reuse this Mat.
-          Mat mat = new Mat();
+    //       // Mats are very memory expensive. Lets reuse this Mat.
+    //       Mat mat = new Mat();
 
-          // This cannot be 'true'. The program will never exit if it is. This
-          // lets the robot stop this thread when restarting robot code or
-          // deploying.
-          while (!Thread.interrupted()) {
-            // Tell the CvSink to grab a frame from the camera and put it
-            // in the source mat.  If there is an error notify the output.
-            if (cvSink.grabFrame(mat) == 0) {
-              // Send the output the error.
-              outputStream.notifyError(cvSink.getError());
-              // skip the rest of the current iteration
-              continue;
-            }
-            // Put a rectangle on the image
-               Imgproc.rectangle(mat, new Point(100, 100), new Point(400, 400), new Scalar(255, 255, 255), 2);
-            // Give the output stream a new image to display
-            outputStream.putFrame(mat);
-          }
-        });
-    m_visionThread.setDaemon(true);
-    m_visionThread.start();
+    //       // This cannot be 'true'. The program will never exit if it is. This
+    //       // lets the robot stop this thread when restarting robot code or
+    //       // deploying.
+    //       while (!Thread.interrupted()) {
+    //         // Tell the CvSink to grab a frame from the camera and put it
+    //         // in the source mat.  If there is an error notify the output.
+    //         if (cvSink.grabFrame(mat) == 0) {
+    //           // Send the output the error.
+    //           outputStream.notifyError(cvSink.getError());
+    //           // skip the rest of the current iteration
+    //           continue;
+    //         }
+    //         // Put a rectangle on the image
+    //            Imgproc.rectangle(mat, new Point(100, 100), new Point(400, 400), new Scalar(255, 255, 255), 2);
+    //         // Give the output stream a new image to display
+    //         outputStream.putFrame(mat);
+    //       }
+    //     });
+    // m_visionThread.setDaemon(true);
+    // m_visionThread.start();
   }
 
   @Override
   public void robotPeriodic() {
+    Pose2d[] poses = visTables.getCam1Poses();
+    SmartDashboard.putNumber("X Pos", poses[0].getX());
+    SmartDashboard.putNumber("Y Pos", poses[0].getY());
+    SmartDashboard.putNumber("Yaw", poses[0].getRotation().getRadians());
+    visTables.putInfoOnDashboard();
   }
 
   @Override
