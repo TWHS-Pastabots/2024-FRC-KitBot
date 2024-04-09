@@ -118,9 +118,11 @@ Thread m_visionThread;
   @Override
   public void robotPeriodic() {
     Pose2d[] poses = visTables.getCam1Poses();
-    SmartDashboard.putNumber("X Pos", poses[0].getX());
-    SmartDashboard.putNumber("Y Pos", poses[0].getY());
-    SmartDashboard.putNumber("Yaw", poses[0].getRotation().getRadians());
+    if(poses.length != 0) {
+      SmartDashboard.putNumber("X Pos", poses[0].getX());
+      SmartDashboard.putNumber("Y Pos", poses[0].getY());
+      SmartDashboard.putNumber("Yaw", poses[0].getRotation().getRadians());
+    }
     visTables.putInfoOnDashboard();
   }
 
