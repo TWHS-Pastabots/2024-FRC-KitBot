@@ -109,11 +109,14 @@ public class VisionTablesListener {
             //     rotation.getZ() - Math.PI
             // ));
 
-            Rotation3d tempRot = EDNtoNWUMAT.unaryMinus().plus(transform.getRotation().plus(EDNtoNWUMAT));
-            transform = new Transform3d(
-                transform.getTranslation().rotateBy(EDNtoNWUMAT),
-                new Rotation3d(tempRot.getX(), -tempRot.getY(), -tempRot.getZ())
-            );
+            // Rotation3d tempRot = EDNtoNWUMAT.unaryMinus().plus(transform.getRotation().plus(EDNtoNWUMAT));
+            // transform = new Transform3d(
+            //     transform.getTranslation().rotateBy(EDNtoNWUMAT),
+            //     new Rotation3d(tempRot.getX(), -tempRot.getY(), -tempRot.getZ())
+            // );
+            SmartDashboard.putNumber("X transform", transform.getX());
+            SmartDashboard.putNumber("Y transform", transform.getY());
+            SmartDashboard.putNumber("Z transform", transform.getZ());
 
             // transform = new Transform3d(
             //     CoordinateSystem.convert(transform.getTranslation(), CoordinateSystem.EDN(), CoordinateSystem.NWU()),
@@ -121,38 +124,21 @@ public class VisionTablesListener {
             //         CoordinateSystem.convert(transform.getRotation(), CoordinateSystem.EDN(), CoordinateSystem.NWU())
             //     )
             // );
-
-            transform = transform.plus(cam1Transform);
-            transform = new Transform3d(
-                new Translation3d(transform.getX(), -transform.getY(), -transform.getZ()),
-                transform.getRotation()
+            Translation3d xyz = CoordinateSystem.convert(
+                transform.getTranslation().rotateBy(transform.inverse().getRotation()), 
+                CoordinateSystem.EDN(), CoordinateSystem.NWU()
             );
-            poses[i] = getBestTagAbsPos((int)ids[i]).transformBy(transform).toPose2d();
+
+            // transform = transform.plus(cam1Transform);
+            // transform = new Transform3d(
+            //     new Translation3d(transform.getX(), -transform.getY(), -transform.getZ()),
+            //     transform.getRotation()
+            // );
+            //poses[i] = getBestTagAbsPos((int)ids[i]).transformBy(transform).toPose2d();
             //poses[i] = ComputerVisionUtil.objectToRobotPose(getBestTagAbsPos((int)ids[i]), transform, cam1Transform).toPose2d();
+            poses[i] = getBestTagAbsPos((int)ids[i]).transformBy(new Transform3d(xyz, new Rotation3d())).transformBy(cam1Transform).toPose2d();
         }
         return poses;
-    }
-
-    public Pose2d[] getCam1RobotPoses() {
-        double[] xPoses = x1Sub.get();
-        double[] yPoses = y1Sub.get();
-        double[] zPoses = z1Sub.get();
-        double[] yaws = yaw1Sub.get();
-        ArrayList<Pose3d> poses = new ArrayList<Pose3d>();
-        for(int i = 0; i < xPoses.length && i < yPoses.length && i < zPoses.length && i < yaws.length; i++) {
-            poses.add(new Pose3d(
-                new Translation3d(xPoses[i], yPoses[i], zPoses[i]), 
-                new Rotation3d(0, 0, yaws[i])
-            ));
-        }
-
-        Pose2d[] pose2ds = new Pose2d[poses.size()];
-        int i = 0;
-        for(Pose3d pose: poses) {
-            pose2ds[i] = pose.toPose2d();
-            i++;
-        }
-        return pose2ds;   
     }
 
     public Pose3d getBestTagAbsPos(int id) {
