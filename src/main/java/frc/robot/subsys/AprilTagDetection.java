@@ -37,7 +37,7 @@ public class AprilTagDetection {
         Rotation3d nwuRot = EDN_TO_NWU.unaryMinus().plus(ednRot.plus(EDN_TO_NWU));
         transform = new Transform3d(
             ednTrl.rotateBy(EDN_TO_NWU), 
-            new Rotation3d(nwuRot.getX(), -nwuRot.getY(), -nwuRot.getZ())
+            new Rotation3d(nwuRot.getX(), nwuRot.getY(), -nwuRot.getZ())
         );
 
         timestamp = Double.parseDouble(splitSerial[8]);
