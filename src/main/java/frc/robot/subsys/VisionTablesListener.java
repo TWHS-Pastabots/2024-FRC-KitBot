@@ -1,5 +1,6 @@
 package frc.robot.subsys;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -25,7 +26,10 @@ public class VisionTablesListener {
     private NetworkTable visionTable;
     private StringArraySubscriber tag1Sub;
 
-    private Transform3d cam1toRobot = new Transform3d(new Translation3d(-0.3556, 0, -0.47), new Rotation3d(0, Math.toRadians(165), 0));
+    private Transform3d cam1toRobot = new Transform3d(
+        new Translation3d(-0.3556, 0, -0.47), 
+        new Rotation3d(0, 0, 0)
+    );
 
     private static LinkedList<AprilTagDetection> tagDetections = new LinkedList<AprilTagDetection>();
     private boolean tagVisible;
@@ -73,7 +77,7 @@ public class VisionTablesListener {
         Pose2d[] poses = new Pose2d[tagDetections.size()];
         for(int i = 0; i < poses.length; i++) {
             Pose3d tagFieldPos = tagLayout.getTagPose(tagDetections.get(i).getID()).get();
-            Transform3d robotPos = tagDetections.get(i).getTransform().plus(cam1Transform);
+            Transform3d robotPos = tagDetections.get(i).getTransform().plus(cam1toRobot);
             robotPos = new Transform3d(
                 new Translation3d(
                     robotPos.getX(),

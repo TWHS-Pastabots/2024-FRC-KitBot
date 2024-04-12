@@ -26,10 +26,10 @@ public class AprilTagDetection {
         );
         Rotation3d ednRot = new Rotation3d(
             new Quaternion(
+                Double.parseDouble(splitSerial[7]),
                 Double.parseDouble(splitSerial[4]),
                 Double.parseDouble(splitSerial[5]),
-                Double.parseDouble(splitSerial[6]),
-                Double.parseDouble(splitSerial[7])
+                Double.parseDouble(splitSerial[6])  
             )
         );
         
